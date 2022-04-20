@@ -1,7 +1,7 @@
 from shopify.shopify import Pipeline, Resource
 
 orders = Pipeline(
-    "dev_Orders",
+    "Orders",
     Resource(
         "orders.json",
         "orders",
@@ -27,6 +27,7 @@ orders = Pipeline(
             "total_tax",
             "refunds",
             "total_shipping_price_set",
+            "line_items",
         ],
     ),
     lambda rows: [
@@ -101,6 +102,24 @@ orders = Pipeline(
             }
             if row.get("total_shipping_price_set")
             else {},
+            "line_items": [
+                {
+                    "id": line_item.get("id"),
+                    "product_id": line_item.get("product_id"),
+                    "sku": line_item.get("sku"),
+                    "title": line_item.get("title"),
+                    "quantity": line_item.get("quantity"),
+                    "price_set": {
+                        "amount": line_item["price_set"].get("amount"),
+                        "currency_code": line_item["price_set"].get("currency_code"),
+                    }
+                    if line_item.get("price_set")
+                    else {},
+                }
+                for line_item in row["line_items"]
+            ]
+            if row.get("line_items")
+            else [],
         }
         for row in rows
     ],
@@ -168,6 +187,27 @@ orders = Pipeline(
                 {
                     "name": "presentment_money",
                     "type": "RECORD",
+                    "fields": [
+                        {"name": "amount", "type": "NUMERIC"},
+                        {"name": "currency_code", "type": "STRING"},
+                    ],
+                },
+            ],
+        },
+        {
+            "name": "line_items",
+            "type": "RECORD",
+            "mode": "REPEATED",
+            "fields": [
+                {"name": "id", "type": "NUMERIC"},
+                {"name": "product_id", "type": "NUMERIC"},
+                {"name": "sku", "type": "STRING"},
+                {"name": "title", "type": "STRING"},
+                {"name": "quantity", "type": "NUMERIC"},
+                {
+                    "name": "price_set",
+                    "type": "RECORD",
+                    "mode": "REPEATED",
                     "fields": [
                         {"name": "amount", "type": "NUMERIC"},
                         {"name": "currency_code", "type": "STRING"},
