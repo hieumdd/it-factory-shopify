@@ -1,7 +1,7 @@
 from shopify.shopify import Pipeline, Resource
 
 orders = Pipeline(
-    "Orders",
+    "dev_Orders",
     Resource(
         "orders.json",
         "orders",
@@ -25,6 +25,8 @@ orders = Pipeline(
             "total_discounts",
             "total_price",
             "total_tax",
+            "refunds",
+            "total_shipping_price_set",
         ],
     ),
     lambda rows: [
@@ -58,6 +60,47 @@ orders = Pipeline(
             "total_discounts": row.get("total_discounts"),
             "total_price": row.get("total_price"),
             "total_tax": row.get("total_tax"),
+            "refunds": [
+                {
+                    "id": refund.get("id"),
+                    "created_at": refund.get("created_at"),
+                    "order_adjustments": [
+                        {
+                            "amount": order_adjustment.get("amount"),
+                        }
+                        for order_adjustment in refund["order_adjustments"]
+                    ]
+                    if refund.get("order_adjustments")
+                    else {},
+                }
+                for refund in row["refunds"]
+            ]
+            if row.get("refunds")
+            else [],
+            "total_shipping_price_set": {
+                "shop_money": {
+                    "amount": row["total_shipping_price_set"]["shop_money"].get(
+                        "amount"
+                    ),
+                    "currency_code": row["total_shipping_price_set"]["shop_money"].get(
+                        "currency_code"
+                    ),
+                }
+                if row["total_shipping_price_set"].get("shop_money")
+                else {},
+                "presentment_money": {
+                    "amount": row["total_shipping_price_set"]["presentment_money"].get(
+                        "amount"
+                    ),
+                    "currency_code": row["total_shipping_price_set"][
+                        "presentment_money"
+                    ].get("currency_code"),
+                }
+                if row["total_shipping_price_set"].get("presentment_money")
+                else {},
+            }
+            if row.get("total_shipping_price_set")
+            else {},
         }
         for row in rows
     ],
@@ -91,5 +134,46 @@ orders = Pipeline(
         {"name": "total_discounts", "type": "NUMERIC"},
         {"name": "total_price", "type": "NUMERIC"},
         {"name": "total_tax", "type": "NUMERIC"},
+        {
+            "name": "refunds",
+            "type": "RECORD",
+            "mode": "REPEATED",
+            "fields": [
+                {"name": "id", "type": "NUMERIC"},
+                {"name": "created_at", "type": "TIMESTAMP"},
+                {
+                    "name": "order_adjustments",
+                    "type": "RECORD",
+                    "mode": "REPEATED",
+                    "fields": [
+                        {"name": "amount", "type": "STRING"},
+                    ],
+                },
+                {"name": "last_name", "type": "STRING"},
+                {"name": "phone", "type": "STRING"},
+            ],
+        },
+        {
+            "name": "total_shipping_price_set",
+            "type": "RECORD",
+            "fields": [
+                {
+                    "name": "shop_money",
+                    "type": "RECORD",
+                    "fields": [
+                        {"name": "amount", "type": "NUMERIC"},
+                        {"name": "currency_code", "type": "STRING"},
+                    ],
+                },
+                {
+                    "name": "presentment_money",
+                    "type": "RECORD",
+                    "fields": [
+                        {"name": "amount", "type": "NUMERIC"},
+                        {"name": "currency_code", "type": "STRING"},
+                    ],
+                },
+            ],
+        },
     ],
 )
