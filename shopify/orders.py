@@ -28,6 +28,7 @@ orders = Pipeline(
             "refunds",
             "total_shipping_price_set",
             "line_items",
+            "tags",
         ],
     ),
     lambda rows: [
@@ -120,6 +121,7 @@ orders = Pipeline(
             ]
             if row.get("line_items")
             else [],
+            "tags": row.get("tags"),
         }
         for row in rows
     ],
@@ -215,5 +217,6 @@ orders = Pipeline(
                 },
             ],
         },
+        {"name": "tags", "type": "STRING"},
     ],
 )
