@@ -4,7 +4,7 @@ from shopify import shopify_service
 from tasks import tasks_service
 
 TIMEFRAME = [
-    ("auto", (None, None)),
+    # ("auto", (None, None)),
     ("manual", ("2022-01-01", "2022-05-01")),
 ]
 
