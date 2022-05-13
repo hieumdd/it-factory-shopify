@@ -8,7 +8,6 @@ from google import auth
 
 
 _, PROJECT_ID = auth.default()
-TASKS_CLIENT = tasks_v2.CloudTasksClient()
 
 CLOUD_TASKS_PATH = (PROJECT_ID, "us-central1", "shopify")
 
@@ -17,11 +16,12 @@ def create_tasks(
     payloads: list[dict[str, Any]],
     name_fn: Callable[[dict[str, Any]], str],
 ) -> int:
-    tasks = [
-        {
-            "parent": TASKS_CLIENT.queue_path(*CLOUD_TASKS_PATH),
-            "task": {
-                "name": TASKS_CLIENT.task_path(
+    with tasks_v2.CloudTasksClient() as client:
+        parent = client.queue_path(*CLOUD_TASKS_PATH)
+
+        tasks = [
+            {
+                "name": client.task_path(
                     *CLOUD_TASKS_PATH,
                     task=f"{name_fn(payload)}-{uuid.uuid4()}",
                 ),
@@ -36,8 +36,17 @@ def create_tasks(
                     },
                     "body": json.dumps(payload).encode(),
                 },
-            },
-        }
-        for payload in payloads
-    ]
-    return len([TASKS_CLIENT.create_task(task) for task in tasks])
+            }
+            for payload in payloads
+        ]
+        return len(
+            [
+                client.create_task(
+                    request={  # type: ignore
+                        "parent": parent,
+                        "task": task,
+                    }
+                )
+                for task in tasks
+            ]
+        )
