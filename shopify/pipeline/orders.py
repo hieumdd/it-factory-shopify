@@ -1,4 +1,4 @@
-from shopify.shopify import Pipeline, Resource
+from shopify.pipeline.interface import Pipeline, Resource
 
 pipeline = Pipeline(
     "Orders",
@@ -30,6 +30,7 @@ pipeline = Pipeline(
             "line_items",
             "tags",
         ],
+        {"status": "any"},
     ),
     lambda rows: [
         {

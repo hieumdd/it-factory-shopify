@@ -2,13 +2,14 @@ from typing import Optional, Union
 
 from compose import compose
 
-from shopify import shopify, shopify_repo
+from shopify import shopify_repo
 from db.bigquery import get_last_timestamp, load
+from shopify.pipeline import interface
 
 
 def pipeline_service(
-    pipeline: shopify.Pipeline,
-    shop: shopify.Shop,
+    pipeline: interface.Pipeline,
+    shop: interface.Shop,
     start: Optional[str],
     end: Optional[str],
 ) -> dict[str, Union[str, int]]:

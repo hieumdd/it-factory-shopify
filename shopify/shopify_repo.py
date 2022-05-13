@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-from shopify import shopify
+from shopify.pipeline import interface
 
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
@@ -27,21 +27,20 @@ def build_params(
     start, end = [i.strftime(TIMESTAMP_FORMAT) for i in timeframe]
     return {
         "limit": 250,
-        "status": "any",
         "fields": ",".join(fields),
         "updated_at_min": start,
         "updated_at_max": end,
     }
 
 
-def get(resource: shopify.Resource, shop: shopify.Shop):
+def get(resource: interface.Resource, shop: interface.Shop):
     def _get(timeframe: tuple[datetime, datetime]):
         def __get(
             client: requests.Session,
             url: str,
             params: dict[str, Union[str, int]] = {},
         ) -> list[dict[str, Any]]:
-            with client.get(url, params=params) as r:
+            with client.get(url, params={**resource.params, **params}) as r:
                 res = r.json()
             data = res[resource.data_key]
             next_link = r.links.get("next")

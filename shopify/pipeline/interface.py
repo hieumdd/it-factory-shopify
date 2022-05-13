@@ -1,5 +1,5 @@
 from typing import Callable, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -14,6 +14,7 @@ class Resource:
     endpoint: str
     data_key: str
     fields: list[str]
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

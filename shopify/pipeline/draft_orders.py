@@ -1,4 +1,4 @@
-from shopify.shopify import Pipeline, Resource
+from shopify.pipeline.interface import Pipeline, Resource
 
 pipeline = Pipeline(
     "DraftOrders",
