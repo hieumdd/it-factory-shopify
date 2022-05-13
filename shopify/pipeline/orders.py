@@ -1,6 +1,6 @@
 from shopify.shopify import Pipeline, Resource
 
-orders = Pipeline(
+pipeline = Pipeline(
     "Orders",
     Resource(
         "orders.json",

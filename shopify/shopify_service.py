@@ -1,28 +1,9 @@
 from typing import Optional, Union
-import os
 
 from compose import compose
 
-from shopify import shopify, shopify_repo, orders
+from shopify import shopify, shopify_repo
 from db.bigquery import get_last_timestamp, load
-
-pipelines = {
-    i.table: i
-    for i in [
-        orders.orders,
-    ]
-}
-
-shops = {
-    i.shop_url: i
-    for i in [
-        shopify.Shop(
-            "ItFactory",
-            "itfactoryca",
-            os.getenv("IT_FACTORY_TOKEN", ""),
-        ),
-    ]
-}
 
 
 def pipeline_service(

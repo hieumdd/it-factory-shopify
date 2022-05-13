@@ -1,4 +1,5 @@
-from shopify import shopify_service
+from shopify.shop import shops
+from shopify.pipeline import pipelines
 from tasks import cloud_tasks
 
 
@@ -12,8 +13,8 @@ def tasks_service(body: dict[str, str]):
                     "start": body.get("start"),
                     "end": body.get("end"),
                 }
-                for p in shopify_service.pipelines.keys()
-                for s in shopify_service.shops.keys()
+                for p in pipelines.keys()
+                for s in shops.keys()
             ],
             lambda x: f"{x['resource']}-{x['shop']}",
         )

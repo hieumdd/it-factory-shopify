@@ -1,5 +1,7 @@
 import pytest
 
+from shopify.pipeline import pipelines
+from shopify.shop import shops
 from shopify import shopify_service
 from tasks import tasks_service
 
@@ -18,16 +20,16 @@ def timeframe(request):
 
 
 @pytest.fixture(
-    params=shopify_service.pipelines.values(),
-    ids=shopify_service.pipelines.keys(),
+    params=pipelines.values(),
+    ids=pipelines.keys(),
 )
 def pipeline(request):
     return request.param
 
 
 @pytest.fixture(
-    params=shopify_service.shops.values(),
-    ids=shopify_service.shops.keys(),
+    params=shops.values(),
+    ids=shops.keys(),
 )
 def shop(request):
     return request.param
